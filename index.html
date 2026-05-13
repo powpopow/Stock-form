@@ -34,14 +34,14 @@
 
     /* TOP HEADER */
     .top-header { padding: 48px 20px 80px; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 50%, #2196f3 100%); position: relative; overflow: hidden; }
-    .top-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.06); border-radius: 50%; }
-    .top-header::after { content: ''; position: absolute; bottom: 20px; left: -40px; width: 140px; height: 140px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+    .top-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none; }
+    .top-header::after { content: ''; position: absolute; bottom: 20px; left: -40px; width: 140px; height: 140px; background: rgba(255,255,255,0.04); border-radius: 50%; pointer-events: none; }
     .top-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
     .top-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.2; }
     .user-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 500; }
 
     /* ACTION BUTTONS */
-    .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 20px; }
+    .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 20px; position: relative; z-index: 2; }
     .action-btn { background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 12px 4px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
     .action-btn.active { background: #fff; border-color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
     .action-btn .ms { font-size: 24px; display: block; margin-bottom: 4px; color: rgba(255,255,255,0.85); }
@@ -157,7 +157,13 @@
         <span class="ms" style="font-size:16px;color:rgba(255,255,255,0.8)">person</span>
         <span id="user-name-badge">กำลังโหลด...</span>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:0.5px;">v<span id="version-display"></span></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="openHistory()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff;font-size:12px;font-weight:700;font-family:'Noto Sans Thai',sans-serif;">
+          <span class="ms" style="font-size:16px;color:#fff">history</span>
+          ประวัติ
+        </button>
+        <div style="font-size:10px;color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:0.5px;">v<span id="version-display"></span></div>
+      </div>
     </div>
     <div class="action-row">
       <div class="action-btn active" id="btn-IN" onclick="selectAction('IN')">
@@ -290,7 +296,7 @@
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpTW6297O_iP8bIWxu_8KSzUE2MnHeU_CwDSEBOvZbbemH7sk4NKDAtJCY_GkuzITi/exec';
 const LIFF_ID = '2010076946-hXx9D9XU';
-const VERSION = '1.4.0'; // cancel clears + version display
+const VERSION = '1.5.1'; // fix IN button tap area
 
 // Different building/place icons so each location looks distinct
 const LOC_ICONS = [
@@ -352,6 +358,15 @@ async function init() {
     applyFontPreference();
   } catch(err) {
     document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:32px;color:#fff"><div style="font-size:40px;margin-bottom:12px">❌</div><div style="font-size:14px">เกิดข้อผิดพลาด:<br>${err.message}</div></div>`;
+  }
+}
+
+function openHistory() {
+  const url = 'https://powpopow.github.io/Stock-form/history.html?userId=' + currentUserId;
+  if (liff.isInClient()) {
+    liff.openWindow({ url, external: false });
+  } else {
+    window.open(url, '_blank');
   }
 }
 
