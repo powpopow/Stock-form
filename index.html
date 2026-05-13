@@ -125,7 +125,7 @@
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpTW6297O_iP8bIWxu_8KSzUE2MnHeU_CwDSEBOvZbbemH7sk4NKDAtJCY_GkuzITi/exec';
-const LIFF_ID = '2010075796-RNmIS1IL';
+const LIFF_ID = '2010075796-RNmIS1lL'; // ✅ fixed: lL not IL
 
 let userData = null;
 let configData = null;
@@ -135,7 +135,7 @@ let currentUserId = null;
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
-    
+
     // Get user profile
     const profile = await liff.getProfile();
     currentUserId = profile.userId;
@@ -143,11 +143,11 @@ async function init() {
     // Get action from URL param
     const params = new URLSearchParams(window.location.search);
     const action = params.get('action') || 'IN';
-    
+
     // Load data from Apps Script
     const response = await fetch(`${APPS_SCRIPT_URL}?action=getFormData&userId=${currentUserId}`);
     const data = await response.json();
-    
+
     if (!data.success) {
       alert('⚠️ คุณยังไม่ได้ลงทะเบียน กรุณาติดต่อผู้จัดการ\n\nรหัสของคุณ:\n' + currentUserId);
       liff.closeWindow();
@@ -178,13 +178,13 @@ function selectAction(action) {
   currentAction = action;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`[data-action="${action}"]`).classList.add('active');
-  
+
   // Show/hide destination for MOVE
   document.getElementById('destination-field').classList.toggle('hidden', action !== 'MOVE');
-  
+
   // Show/hide reason for OUT
   document.getElementById('reason-field').classList.toggle('hidden', action !== 'OUT');
-  
+
   // Reset item selections
   onFamilyChange();
   updateQtyLabel();
@@ -195,7 +195,7 @@ function populateLocations() {
   const destSel = document.getElementById('destination');
   sel.innerHTML = '<option value="">-- เลือกสถานที่ --</option>';
   destSel.innerHTML = '<option value="">-- เลือกปลายทาง --</option>';
-  
+
   userData.locations.forEach(l => {
     sel.innerHTML += `<option value="${l}">${l}</option>`;
     destSel.innerHTML += `<option value="${l}">${l}</option>`;
@@ -228,7 +228,6 @@ function populateReasons() {
 }
 
 function onLocationChange() {
-  // Filter destination to exclude selected location
   const loc = document.getElementById('location').value;
   const destSel = document.getElementById('destination');
   destSel.innerHTML = '<option value="">-- เลือกปลายทาง --</option>';
@@ -241,15 +240,14 @@ function onFamilyChange() {
   const family = document.getElementById('family').value;
   const itemSel = document.getElementById('item');
   itemSel.innerHTML = '<option value="">-- เลือกสินค้า --</option>';
-  
+
   if (!family) return;
-  
+
   const items = configData.items.filter(i => i.family === family);
   items.forEach(i => {
     itemSel.innerHTML += `<option value="${i.itemId}">${i.itemName}</option>`;
   });
 
-  // Auto-select if only one item
   if (items.length === 1) {
     itemSel.value = items[0].itemId;
     onItemChange();
@@ -262,14 +260,12 @@ function onFamilyChange() {
 function onItemChange() {
   const itemId = document.getElementById('item').value;
   const item = configData.items.find(i => i.itemId === itemId);
-  
-  // Reset
+
   document.getElementById('variation-field').classList.add('hidden');
   document.getElementById('out-target-field').classList.add('hidden');
 
   if (!item) return;
 
-  // Show variations
   if (item.variations && item.variations.length > 0) {
     const varSel = document.getElementById('variation');
     varSel.innerHTML = '<option value="">-- เลือกขนาด --</option>';
@@ -278,7 +274,6 @@ function onItemChange() {
     });
     document.getElementById('variation-field').classList.remove('hidden');
 
-    // Auto-select if only one variation
     if (item.variations.length === 1) {
       varSel.value = item.variations[0];
       onVariationChange();
@@ -293,12 +288,11 @@ function onItemChange() {
 function onVariationChange() {
   const itemId = document.getElementById('item').value;
   const item = configData.items.find(i => i.itemId === itemId);
-  
+
   document.getElementById('out-target-field').classList.add('hidden');
 
   if (!item || !item.rule) return;
 
-  // Show OUT target if applicable
   if (currentAction === 'OUT' && item.rule.ruleType === 'OUT_TARGET') {
     const targetItem = configData.items.find(i => i.itemId === item.rule.value);
     if (targetItem) {
@@ -308,7 +302,6 @@ function onVariationChange() {
         sel.innerHTML += `<option value="${v}">${v}</option>`;
       });
       document.getElementById('out-target-field').classList.remove('hidden');
-      // Hide reason for OUT_TARGET
       document.getElementById('reason-field').classList.add('hidden');
     }
   }
@@ -323,7 +316,7 @@ function onReasonChange() {
 
 function updateQtyLabel(item) {
   if (!item) {
-    item = configData.items.find(i => i.itemId === document.getElementById('item').value);
+    item = configData ? configData.items.find(i => i.itemId === document.getElementById('item').value) : null;
   }
   const unit = item ? item.unit : '';
   document.getElementById('qty-label').textContent = `จำนวน${unit ? ' (' + unit + ')' : ''}`;
@@ -339,7 +332,6 @@ async function submitForm() {
   const destination = document.getElementById('destination').value || '';
   const qty = parseFloat(document.getElementById('qty').value);
   const reasonSel = document.getElementById('reason');
-  const reasonId = reasonSel.value || '';
   const reasonLabel = reasonSel.options[reasonSel.selectedIndex]?.text || '';
   const reasonText = document.getElementById('reason-text').value || '';
   const finalReason = reasonText || reasonLabel;
@@ -386,14 +378,13 @@ async function submitForm() {
     const result = await response.json();
 
     if (result.success) {
-      // Show success
       document.getElementById('form-container').classList.add('hidden');
       document.getElementById('success').classList.remove('hidden');
-      
+
       let detail = `รายการ: ${action}\nสินค้า: ${family} ${item?.itemName} ${variation}\nจำนวน: ${qty} ${item?.unit}\nสถานที่: ${location}`;
       if (destination) detail += ` → ${destination}`;
       if (finalReason) detail += `\nเหตุผล: ${finalReason}`;
-      
+
       document.getElementById('success-detail').textContent = detail;
     } else {
       alert('เกิดข้อผิดพลาด: ' + result.error);
