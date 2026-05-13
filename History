@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ประวัติการบันทึก</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: #1a73e8; min-height: 100vh; }
+    .ms { font-family: 'Material Symbols Rounded'; font-size: 22px; vertical-align: middle; line-height: 1; }
+
+    .top-header { padding: 48px 20px 70px; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 50%, #2196f3 100%); position: relative; overflow: hidden; }
+    .top-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none; }
+    .top-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .top-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .top-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+    .back-btn { position: absolute; top: 16px; left: 16px; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Noto Sans Thai', sans-serif; }
+    .back-btn .ms { font-size: 18px; }
+
+    .sheet { background: #fff; border-radius: 24px 24px 0 0; min-height: calc(100vh - 180px); margin-top: -24px; padding: 20px 0 40px; }
+    .sheet-handle { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 20px; }
+
+    .loading { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+    .empty { text-align: center; padding: 60px 20px; color: #aaa; }
+    .empty .ms { font-size: 48px; display: block; margin-bottom: 12px; color: #ddd; }
+    .empty-text { font-size: 15px; font-weight: 600; color: #bbb; }
+
+    .history-item { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 14px; }
+    .history-item:last-child { border-bottom: none; }
+    .action-badge { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .action-badge .ms { font-size: 20px; }
+    .badge-IN { background: #e8f5e9; }
+    .badge-IN .ms { color: #2e7d32; }
+    .badge-OUT { background: #fff3e0; }
+    .badge-OUT .ms { color: #e65100; }
+    .badge-COUNT { background: #e3f2fd; }
+    .badge-COUNT .ms { color: #1565c0; }
+    .badge-MOVE { background: #f3e5f5; }
+    .badge-MOVE .ms { color: #6a1b9a; }
+    .badge-PROD { background: #fce4ec; }
+    .badge-PROD .ms { color: #880e4f; }
+
+    .history-info { flex: 1; min-width: 0; }
+    .history-item-name { font-size: 14px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item-detail { font-size: 12px; color: #888; margin-top: 2px; }
+    .history-right { text-align: right; flex-shrink: 0; }
+    .history-qty { font-size: 15px; font-weight: 800; color: #1a73e8; }
+    .history-time { font-size: 11px; color: #bbb; margin-top: 2px; }
+
+    .section-date { padding: 8px 20px; background: #f8f9ff; font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f0f0f0; }
+  </style>
+</head>
+<body>
+
+<div class="top-header">
+  <button class="back-btn" onclick="goBack()">
+    <span class="ms">arrow_back</span>
+    กลับ
+  </button>
+  <div class="top-meta">Stock Management</div>
+  <div class="top-title">ประวัติการบันทึก</div>
+  <div class="top-sub">20 รายการล่าสุดของคุณ</div>
+</div>
+
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div id="content">
+    <div class="loading">
+      <span class="ms" style="font-size:32px;display:block;margin-bottom:8px;color:#ddd">hourglass_top</span>
+      กำลังโหลด...
+    </div>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpTW6297O_iP8bIWxu_8KSzUE2MnHeU_CwDSEBOvZbbemH7sk4NKDAtJCY_GkuzITi/exec';
+
+const ACTION_CONFIG = {
+  'IN':       { icon: 'move_to_inbox', badge: 'badge-IN',    label: 'นำเข้า' },
+  'OUT':      { icon: 'outbox',        badge: 'badge-OUT',   label: 'นำออก' },
+  'COUNT':    { icon: 'fact_check',    badge: 'badge-COUNT', label: 'นับสต็อก' },
+  'MOVE-OUT': { icon: 'swap_horiz',    badge: 'badge-MOVE',  label: 'โอนย้าย' },
+  'MOVE-IN':  { icon: 'swap_horiz',    badge: 'badge-MOVE',  label: 'โอนย้าย' },
+  'PROD-OUT': { icon: 'precision_manufacturing', badge: 'badge-PROD', label: 'ผลิต (ออก)' },
+  'PROD-IN':  { icon: 'precision_manufacturing', badge: 'badge-PROD', label: 'ผลิต (เข้า)' },
+};
+
+function goBack() {
+  if (window.history.length > 1) { window.history.back(); }
+  else { window.close(); }
+}
+
+async function loadHistory() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+
+  if (!userId) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <span class="ms">error</span>
+        <div class="empty-text">ไม่พบข้อมูลผู้ใช้</div>
+      </div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getHistory&userId=${userId}`);
+    const data = await res.json();
+
+    if (!data.success || data.history.length === 0) {
+      document.getElementById('content').innerHTML = `
+        <div class="empty">
+          <span class="ms">inventory</span>
+          <div class="empty-text">ยังไม่มีประวัติการบันทึก</div>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    let lastDate = '';
+
+    data.history.forEach(row => {
+      // Extract date part for grouping
+      const dateStr = row.time.split(' ')[0];
+      if (dateStr !== lastDate) {
+        html += `<div class="section-date">${dateStr}</div>`;
+        lastDate = dateStr;
+      }
+
+      const cfg = ACTION_CONFIG[row.action] || { icon: 'circle', badge: 'badge-IN', label: row.action };
+      const itemLabel = [row.itemName, row.variation].filter(Boolean).join(' ');
+      const detail = [row.family, row.location, row.note].filter(Boolean).join(' · ');
+
+      html += `
+        <div class="history-item">
+          <div class="action-badge ${cfg.badge}">
+            <span class="ms">${cfg.icon}</span>
+          </div>
+          <div class="history-info">
+            <div class="history-item-name">${itemLabel || '-'}</div>
+            <div class="history-item-detail">${cfg.label} · ${detail}</div>
+          </div>
+          <div class="history-right">
+            <div class="history-qty">${row.qty} ${row.unit}</div>
+            <div class="history-time">${row.time.split(' ')[1] || ''}</div>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('content').innerHTML = html;
+
+  } catch(err) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <span class="ms">error</span>
+        <div class="empty-text">เกิดข้อผิดพลาด: ${err.message}</div>
+      </div>`;
+  }
+}
+
+loadHistory();
+</script>
+</body>
+</html>
