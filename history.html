@@ -14,12 +14,12 @@
     body { font-family: 'Noto Sans Thai', sans-serif; background: #1a73e8; min-height: 100vh; }
     .ms { font-family: 'Material Symbols Rounded'; font-size: 22px; vertical-align: middle; line-height: 1; }
 
-    .top-header { padding: 48px 20px 70px; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 50%, #2196f3 100%); position: relative; overflow: hidden; }
+    .top-header { padding: 20px 20px 70px; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 50%, #2196f3 100%); position: relative; overflow: hidden; }
     .top-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none; }
-    .top-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .top-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; margin-top: 48px; }
     .top-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; }
     .top-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
-    .back-btn { position: absolute; top: 16px; left: 16px; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Noto Sans Thai', sans-serif; }
+    .back-btn { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 6px 14px; cursor: pointer; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Noto Sans Thai', sans-serif; position: relative; z-index: 10; }
     .back-btn .ms { font-size: 18px; }
 
     .sheet { background: #fff; border-radius: 24px 24px 0 0; min-height: calc(100vh - 180px); margin-top: -24px; padding: 20px 0 40px; }
@@ -91,8 +91,10 @@ const ACTION_CONFIG = {
 };
 
 function goBack() {
-  if (window.history.length > 1) { window.history.back(); }
-  else { window.close(); }
+  const formUrl = 'https://powpopow.github.io/Stock-form/';
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+  window.location.href = formUrl + (userId ? '?userId=' + userId : '');
 }
 
 async function loadHistory() {
