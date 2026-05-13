@@ -138,7 +138,7 @@ async function init() {
 
     // If not logged in (e.g. PC external browser), trigger LINE login
     if (!liff.isLoggedIn()) {
-      liff.login();
+      liff.login({ redirectUri: window.location.href });
       return;
     }
 
