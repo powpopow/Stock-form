@@ -2,414 +2,586 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Stock Form</title>
   <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', sans-serif; background: #f5f5f5; min-height: 100vh; }
-    .header { background: #06c755; color: white; padding: 16px; text-align: center; font-size: 18px; font-weight: bold; }
-    .container { padding: 16px; max-width: 480px; margin: 0 auto; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .field { margin-bottom: 16px; }
-    label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
-    select, input { width: 100%; padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 15px; background: white; appearance: none; -webkit-appearance: none; }
-    select:focus, input:focus { outline: none; border-color: #06c755; }
-    .btn { width: 100%; padding: 14px; background: #06c755; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    .btn-cancel { background: #f5f5f5; color: #666; margin-top: 8px; }
-    .hidden { display: none; }
-    .loading { text-align: center; padding: 40px; color: #666; }
-    .success { text-align: center; padding: 40px; }
-    .success .icon { font-size: 60px; margin-bottom: 16px; }
-    .success h2 { color: #06c755; margin-bottom: 8px; }
-    .success p { color: #666; font-size: 14px; line-height: 1.6; }
-    .action-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 500; cursor: pointer; color: #666; background: white; }
-    .tab.active { border-color: #06c755; color: #06c755; background: #f0fff4; }
-    .section-title { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: #1a73e8; min-height: 100vh; overflow-x: hidden; }
+    .ms { font-family: 'Material Symbols Rounded'; font-size: 22px; vertical-align: middle; line-height: 1; }
+
+    /* TOP HEADER */
+    .top-header { padding: 48px 20px 80px; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 50%, #2196f3 100%); position: relative; overflow: hidden; }
+    .top-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+    .top-header::after { content: ''; position: absolute; bottom: 20px; left: -40px; width: 140px; height: 140px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+    .top-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .top-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.2; }
+    .user-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 500; }
+
+    /* ACTION BUTTONS */
+    .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 20px; }
+    .action-btn { background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 12px 4px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .action-btn.active { background: #fff; border-color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    .action-btn .ms { font-size: 24px; display: block; margin-bottom: 4px; color: rgba(255,255,255,0.85); }
+    .action-btn.active .ms { color: #1a73e8; }
+    .action-btn .lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.85); line-height: 1.3; }
+    .action-btn.active .lbl { color: #1a73e8; }
+
+    /* BOTTOM SHEET */
+    .sheet { background: #fff; border-radius: 24px 24px 0 0; min-height: calc(100vh - 220px); margin-top: -24px; position: relative; z-index: 10; padding: 8px 0 120px; }
+    .sheet-handle { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 8px auto 20px; }
+
+    /* STEPS */
+    .step { border-bottom: 1px solid #f0f0f0; overflow: hidden; }
+    .step-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; }
+    .step-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: #f0f0f0; color: #aaa; flex-shrink: 0; transition: all 0.2s; }
+    .step.active .step-number { background: #1a73e8; color: #fff; }
+    .step.done .step-number { background: #e8f5e9; }
+    .step-title { font-size: 14px; font-weight: 700; color: #ccc; flex: 1; }
+    .step.active .step-title { color: #111; }
+    .step.done .step-title { color: #555; }
+    .step-summary { font-size: 12px; color: #1a73e8; font-weight: 600; max-width: 45%; text-align: right; }
+    .step-body { padding: 0 20px 20px; display: none; }
+    .step.active .step-body { display: block; }
+
+    /* TAP CARDS */
+    .tap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .tap-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .tap-card { padding: 14px 8px 12px; border: 2px solid #e8e8e8; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafafa; }
+    .tap-card:active { transform: scale(0.96); }
+    .tap-card.selected { border-color: #1a73e8; background: #e8f0fe; }
+    .tap-card .ms { font-size: 26px; display: block; margin-bottom: 6px; color: #999; }
+    .tap-card.selected .ms { color: #1a73e8; }
+    .tap-card .tap-label { font-size: 12px; font-weight: 700; color: #555; line-height: 1.3; }
+    .tap-card.selected .tap-label { color: #1a73e8; }
+
+    /* PILLS */
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .pill { padding: 8px 16px; border: 2px solid #e8e8e8; border-radius: 20px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; background: #fafafa; transition: all 0.15s; font-family: 'Noto Sans Thai', sans-serif; }
+    .pill:active { transform: scale(0.96); }
+    .pill.selected { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
+
+    /* FIELDS */
+    .field { margin-bottom: 14px; }
+    .field-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    select, input[type=number], input[type=text] { width: 100%; padding: 12px 14px; border: 2px solid #e8e8e8; border-radius: 12px; font-size: 14px; font-family: 'Noto Sans Thai', sans-serif; color: #333; background: #fafafa; appearance: none; -webkit-appearance: none; transition: border-color 0.15s; }
+    select:focus, input:focus { outline: none; border-color: #1a73e8; background: #fff; }
+
+    /* QTY */
+    .qty-wrap { position: relative; }
+    input.qty-input { font-size: 28px; font-weight: 800; text-align: center; color: #1a73e8; padding: 16px; border-radius: 16px; }
+    .qty-unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 600; color: #aaa; }
+
+    /* CONFIRM */
+    .confirm-card { background: #f8f9ff; border: 2px solid #e8f0fe; border-radius: 16px; padding: 16px; }
+    .confirm-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #eef0f8; font-size: 13px; }
+    .confirm-row:last-child { border-bottom: none; }
+    .confirm-key { color: #888; font-weight: 500; }
+    .confirm-val { font-weight: 700; color: #111; text-align: right; max-width: 60%; }
+    .confirm-action { font-size: 15px; font-weight: 800; color: #1a73e8; }
+
+    /* FOOTER */
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 20px 28px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; z-index: 100; }
+    .btn-cancel { flex: 1; padding: 14px; border: 2px solid #e8e8e8; border-radius: 14px; font-size: 14px; font-weight: 700; color: #888; background: #fff; font-family: 'Noto Sans Thai', sans-serif; cursor: pointer; }
+    .btn-save { flex: 2; padding: 14px; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; color: #fff; background: #1a73e8; font-family: 'Noto Sans Thai', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+    .btn-save:active { transform: scale(0.97); }
+    .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* LOADING */
+    .loading-screen { position: fixed; inset: 0; background: linear-gradient(160deg, #1557b0 0%, #1a73e8 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; color: #fff; }
+    .loading-icon { font-size: 56px; margin-bottom: 16px; animation: pulse 1.5s infinite; }
+    .loading-text { font-size: 16px; font-weight: 600; opacity: 0.85; }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.8} }
+
+    /* SUCCESS */
+    .success-screen { position: fixed; inset: 0; background: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999; padding: 32px; text-align: center; }
+    .success-circle { width: 90px; height: 90px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+    .success-circle .ms { font-size: 48px; color: #2e7d32; }
+    .success-title { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 8px; }
+    .success-sub { font-size: 14px; color: #888; line-height: 1.6; margin-bottom: 32px; }
+    .btn-new { width: 100%; padding: 16px; background: #1a73e8; color: #fff; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; font-family: 'Noto Sans Thai', sans-serif; cursor: pointer; margin-bottom: 10px; }
+    .btn-close { width: 100%; padding: 16px; background: #f5f5f5; color: #666; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; font-family: 'Noto Sans Thai', sans-serif; cursor: pointer; }
+
+    .hidden { display: none !important; }
+    .divider { height: 1px; background: #f0f0f0; margin: 4px 0 14px; }
   </style>
 </head>
 <body>
 
-<div class="header">📦 บันทึกสต็อก</div>
-
-<div id="loading" class="loading">กำลังโหลด...</div>
-
-<div id="form-container" class="container hidden">
-  <div class="card">
-    <div class="section-title">รายการ</div>
-    <div class="action-tabs">
-      <div class="tab active" data-action="IN" onclick="selectAction('IN')">📥 นำเข้า</div>
-      <div class="tab" data-action="OUT" onclick="selectAction('OUT')">📤 นำออก</div>
-      <div class="tab" data-action="COUNT" onclick="selectAction('COUNT')">🔢 นับสต็อก</div>
-      <div class="tab" data-action="MOVE" onclick="selectAction('MOVE')">🔄 โอนย้าย</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">สถานที่</div>
-    <div class="field">
-      <label>สถานที่ต้นทาง</label>
-      <select id="location" onchange="onLocationChange()">
-        <option value="">-- เลือกสถานที่ --</option>
-      </select>
-    </div>
-    <div class="field hidden" id="destination-field">
-      <label>สถานที่ปลายทาง</label>
-      <select id="destination">
-        <option value="">-- เลือกปลายทาง --</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">สินค้า</div>
-    <div class="field">
-      <label>ประเภทสินค้า</label>
-      <select id="family" onchange="onFamilyChange()">
-        <option value="">-- เลือกประเภท --</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>สินค้า</label>
-      <select id="item" onchange="onItemChange()">
-        <option value="">-- เลือกสินค้า --</option>
-      </select>
-    </div>
-    <div class="field hidden" id="variation-field">
-      <label>ขนาด</label>
-      <select id="variation" onchange="onVariationChange()">
-        <option value="">-- เลือกขนาด --</option>
-      </select>
-    </div>
-    <div class="field hidden" id="out-target-field">
-      <label>ผลิตเป็น</label>
-      <select id="out-target">
-        <option value="">-- เลือกขนาดที่ผลิต --</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">จำนวน</div>
-    <div class="field">
-      <label id="qty-label">จำนวน</label>
-      <input type="number" id="qty" placeholder="0" min="0" step="0.01" inputmode="decimal">
-    </div>
-    <div class="field hidden" id="reason-field">
-      <label>เหตุผลที่นำออก</label>
-      <select id="reason" onchange="onReasonChange()">
-        <option value="">-- เลือกเหตุผล --</option>
-      </select>
-    </div>
-    <div class="field hidden" id="reason-text-field">
-      <label>ระบุเหตุผล</label>
-      <input type="text" id="reason-text" placeholder="กรุณาพิมพ์เหตุผล">
-    </div>
-  </div>
-
-  <button class="btn" onclick="submitForm()" id="submit-btn">✅ บันทึก</button>
-  <button class="btn btn-cancel" onclick="liff.closeWindow()">ยกเลิก</button>
+<div class="loading-screen" id="loading">
+  <div class="loading-icon">📦</div>
+  <div class="loading-text">กำลังโหลด...</div>
 </div>
 
-<div id="success" class="container hidden">
-  <div class="card success">
-    <div class="icon">✅</div>
-    <h2>บันทึกแล้ว!</h2>
-    <p id="success-detail"></p>
-    <button class="btn" style="margin-top:24px" onclick="resetForm()">บันทึกรายการใหม่</button>
-    <button class="btn btn-cancel" onclick="liff.closeWindow()">ปิด</button>
+<div class="success-screen" id="success-screen">
+  <div class="success-circle"><span class="ms">check</span></div>
+  <div class="success-title">บันทึกแล้ว!</div>
+  <div class="success-sub" id="success-detail"></div>
+  <button class="btn-new" onclick="resetForm()">+ บันทึกรายการใหม่</button>
+  <button class="btn-close" onclick="closeOrRedirect()">ปิด</button>
+</div>
+
+<div id="main" class="hidden">
+  <div class="top-header">
+    <div class="top-meta">Stock Management</div>
+    <div class="top-title">บันทึกสต็อก</div>
+    <div class="user-badge">
+      <span class="ms" style="font-size:16px;color:rgba(255,255,255,0.8)">person</span>
+      <span id="user-name-badge">กำลังโหลด...</span>
+    </div>
+    <div class="action-row">
+      <div class="action-btn active" id="btn-IN" onclick="selectAction('IN')">
+        <span class="ms">move_to_inbox</span>
+        <span class="lbl">นำเข้า</span>
+      </div>
+      <div class="action-btn" id="btn-OUT" onclick="selectAction('OUT')">
+        <span class="ms">outbox</span>
+        <span class="lbl">นำออก</span>
+      </div>
+      <div class="action-btn" id="btn-COUNT" onclick="selectAction('COUNT')">
+        <span class="ms">fact_check</span>
+        <span class="lbl">นับสต็อก</span>
+      </div>
+      <div class="action-btn" id="btn-MOVE" onclick="selectAction('MOVE')">
+        <span class="ms">swap_horiz</span>
+        <span class="lbl">โอนย้าย</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+
+    <!-- Step: Location -->
+    <div class="step active" id="step-location">
+      <div class="step-header">
+        <div class="step-number" id="sn-location">1</div>
+        <div class="step-title">สถานที่ต้นทาง</div>
+        <div class="step-summary" id="ss-location"></div>
+      </div>
+      <div class="step-body">
+        <div class="tap-grid" id="location-grid"></div>
+      </div>
+    </div>
+
+    <!-- Step: Destination (MOVE only) -->
+    <div class="step hidden" id="step-destination">
+      <div class="step-header">
+        <div class="step-number" id="sn-destination">2</div>
+        <div class="step-title">สถานที่ปลายทาง</div>
+        <div class="step-summary" id="ss-destination"></div>
+      </div>
+      <div class="step-body">
+        <div class="tap-grid" id="destination-grid"></div>
+      </div>
+    </div>
+
+    <!-- Step: Family -->
+    <div class="step" id="step-family">
+      <div class="step-header">
+        <div class="step-number" id="sn-family">2</div>
+        <div class="step-title">ประเภทสินค้า</div>
+        <div class="step-summary" id="ss-family"></div>
+      </div>
+      <div class="step-body">
+        <div class="tap-grid" id="family-grid"></div>
+      </div>
+    </div>
+
+    <!-- Step: Item -->
+    <div class="step" id="step-item">
+      <div class="step-header">
+        <div class="step-number" id="sn-item">3</div>
+        <div class="step-title">สินค้า</div>
+        <div class="step-summary" id="ss-item"></div>
+      </div>
+      <div class="step-body">
+        <div class="field">
+          <select id="item-select" onchange="onItemSelect()">
+            <option value="">-- เลือกสินค้า --</option>
+          </select>
+        </div>
+        <div id="variation-wrap" class="hidden">
+          <div class="field-label">ขนาด</div>
+          <div class="pill-row" id="variation-pills"></div>
+        </div>
+        <div id="out-target-wrap" class="hidden">
+          <div class="divider"></div>
+          <div class="field-label" style="margin-top:10px;">ผลิตเป็น</div>
+          <div class="pill-row" id="out-target-pills"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step: Qty -->
+    <div class="step" id="step-qty">
+      <div class="step-header">
+        <div class="step-number" id="sn-qty">4</div>
+        <div class="step-title">จำนวน</div>
+        <div class="step-summary" id="ss-qty"></div>
+      </div>
+      <div class="step-body">
+        <div class="qty-wrap">
+          <input class="qty-input" type="number" id="qty" placeholder="0" min="0" step="0.01" inputmode="decimal" oninput="onQtyInput()">
+          <div class="qty-unit" id="qty-unit"></div>
+        </div>
+        <div id="reason-wrap" class="hidden" style="margin-top:14px;">
+          <div class="field-label">เหตุผลที่นำออก</div>
+          <div class="pill-row" id="reason-pills"></div>
+          <div id="reason-text-wrap" class="hidden" style="margin-top:10px;">
+            <input type="text" id="reason-text" placeholder="กรุณาพิมพ์เหตุผล" oninput="onReasonTextInput()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step: Confirm -->
+    <div class="step" id="step-confirm">
+      <div class="step-header">
+        <div class="step-number" id="sn-confirm">5</div>
+        <div class="step-title">ยืนยันรายการ</div>
+      </div>
+      <div class="step-body">
+        <div class="confirm-card" id="confirm-card"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="btn-cancel" onclick="closeOrRedirect()">ยกเลิก</button>
+    <button class="btn-save" id="save-btn" onclick="submitForm()" disabled>
+      <span class="ms" style="font-size:20px">check_circle</span>
+      บันทึก
+    </button>
   </div>
 </div>
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpTW6297O_iP8bIWxu_8KSzUE2MnHeU_CwDSEBOvZbbemH7sk4NKDAtJCY_GkuzITi/exec';
-const LIFF_ID = '2010076946-hXx9D9XU'; // new LIFF ID
+const LIFF_ID = '2010076946-hXx9D9XU';
+const FAMILY_ICONS = {'วัตถุดิบ':'nutrition','สินค้าสำเร็จ':'inventory_2','บรรจุภัณฑ์':'deployed_code','อุปกรณ์':'construction'};
+const LOC_ICONS = ['warehouse','store','home','factory','local_shipping'];
 
-let userData = null;
-let configData = null;
-let currentAction = 'IN';
-let currentUserId = null;
+let userData=null, configData=null, currentAction='IN', currentUserId=null;
+let state={location:null,destination:null,family:null,itemId:null,itemName:null,variation:null,outTarget:null,qty:null,unit:'',reason:null,reasonLabel:null,hasOutTargetRule:false};
+let stepOrder=['location','family','item','qty','confirm'];
+let activeStep='location';
 
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
-
-    // If not logged in (e.g. PC external browser), trigger LINE login
-    if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: window.location.href });
-      return;
-    }
-
-    // Get user profile
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return; }
     const profile = await liff.getProfile();
     currentUserId = profile.userId;
+    document.getElementById('user-name-badge').textContent = profile.displayName;
 
-    // Get action from URL param
     const params = new URLSearchParams(window.location.search);
     const action = params.get('action') || 'IN';
 
-    // Load data from Apps Script
-    const response = await fetch(`${APPS_SCRIPT_URL}?action=getFormData&userId=${currentUserId}`);
-    const data = await response.json();
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getFormData&userId=${currentUserId}`);
+    const data = await res.json();
 
     if (!data.success) {
-      alert('⚠️ คุณยังไม่ได้ลงทะเบียน กรุณาติดต่อผู้จัดการ\n\nรหัสของคุณ:\n' + currentUserId);
-      liff.closeWindow();
+      document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:32px"><div style="font-size:48px;margin-bottom:16px">⚠️</div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">ยังไม่ได้ลงทะเบียน</div><div style="font-size:12px;color:rgba(255,255,255,0.7)">กรุณาติดต่อผู้จัดการ<br><br>${currentUserId}</div></div>`;
       return;
     }
 
-    userData = data.user;
-    configData = data;
-
-    // Populate dropdowns
-    populateLocations();
-    populateReasons();
-    populateFamilies();
-
-    // Set initial action
+    userData = data.user; configData = data;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').classList.remove('hidden');
+    buildLocationGrid(); buildDestinationGrid(); buildFamilyGrid(); buildReasonPills();
     selectAction(action);
-
-    // Show form
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('form-container').classList.remove('hidden');
-
-  } catch (err) {
-    document.getElementById('loading').textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+  } catch(err) {
+    document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:32px;color:#fff"><div style="font-size:40px;margin-bottom:12px">❌</div><div style="font-size:14px">เกิดข้อผิดพลาด:<br>${err.message}</div></div>`;
   }
+}
+
+function closeOrRedirect() {
+  try { liff.closeWindow(); } catch(e) { history.back(); }
 }
 
 function selectAction(action) {
   currentAction = action;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`[data-action="${action}"]`).classList.add('active');
-
-  // Show/hide destination for MOVE
-  document.getElementById('destination-field').classList.toggle('hidden', action !== 'MOVE');
-
-  // Show/hide reason for OUT
-  document.getElementById('reason-field').classList.toggle('hidden', action !== 'OUT');
-
-  // Reset item selections
-  onFamilyChange();
-  updateQtyLabel();
+  ['IN','OUT','COUNT','MOVE'].forEach(a => document.getElementById('btn-'+a).classList.remove('active'));
+  document.getElementById('btn-'+action).classList.add('active');
+  const isMove = action === 'MOVE';
+  document.getElementById('step-destination').classList.toggle('hidden', !isMove);
+  stepOrder = isMove ? ['location','destination','family','item','qty','confirm'] : ['location','family','item','qty','confirm'];
+  updateStepNumbers();
+  resetAllSteps();
+  setStepActive('location');
+  activeStep = 'location';
 }
 
-function populateLocations() {
-  const sel = document.getElementById('location');
-  const destSel = document.getElementById('destination');
-  sel.innerHTML = '<option value="">-- เลือกสถานที่ --</option>';
-  destSel.innerHTML = '<option value="">-- เลือกปลายทาง --</option>';
-
-  userData.locations.forEach(l => {
-    sel.innerHTML += `<option value="${l}">${l}</option>`;
-    destSel.innerHTML += `<option value="${l}">${l}</option>`;
+function updateStepNumbers() {
+  let num = 1;
+  ['location','destination','family','item','qty','confirm'].forEach(s => {
+    const stepEl = document.getElementById('step-'+s);
+    const snEl = document.getElementById('sn-'+s);
+    if (stepEl && snEl && !stepEl.classList.contains('hidden')) {
+      snEl.dataset.num = num;
+      snEl.textContent = num++;
+    }
   });
-
-  // Auto-select if only one location
-  if (userData.locations.length === 1) {
-    sel.value = userData.locations[0];
-  }
 }
 
-function populateFamilies() {
-  const sel = document.getElementById('family');
-  sel.innerHTML = '<option value="">-- เลือกประเภท --</option>';
+function buildLocationGrid() {
+  const g = document.getElementById('location-grid');
+  g.innerHTML = '';
+  if (userData.locations.length >= 5) g.className = 'tap-grid cols-3';
+  userData.locations.forEach((loc,i) => {
+    g.innerHTML += `<div class="tap-card" onclick="selectLocation('${loc}')"><span class="ms">${LOC_ICONS[i%LOC_ICONS.length]}</span><span class="tap-label">${loc}</span></div>`;
+  });
+  if (userData.locations.length === 1) selectLocation(userData.locations[0]);
+}
+
+function buildDestinationGrid() {
+  const g = document.getElementById('destination-grid');
+  g.innerHTML = '';
+  userData.locations.forEach((loc,i) => {
+    g.innerHTML += `<div class="tap-card" id="dest-${loc}" onclick="selectDestination('${loc}')"><span class="ms">${LOC_ICONS[i%LOC_ICONS.length]}</span><span class="tap-label">${loc}</span></div>`;
+  });
+}
+
+function buildFamilyGrid() {
+  const g = document.getElementById('family-grid');
+  g.innerHTML = '';
   configData.families.forEach(f => {
-    sel.innerHTML += `<option value="${f}">${f}</option>`;
+    g.innerHTML += `<div class="tap-card" onclick="selectFamily('${f}')"><span class="ms">${FAMILY_ICONS[f]||'category'}</span><span class="tap-label">${f}</span></div>`;
   });
-  if (configData.families.length === 1) {
-    sel.value = configData.families[0];
-    onFamilyChange();
-  }
+  if (configData.families.length === 1) selectFamily(configData.families[0]);
 }
 
-function populateReasons() {
-  const sel = document.getElementById('reason');
-  sel.innerHTML = '<option value="">-- เลือกเหตุผล --</option>';
+function buildReasonPills() {
+  const w = document.getElementById('reason-pills');
+  w.innerHTML = '';
   configData.reasons.forEach(r => {
-    sel.innerHTML += `<option value="${r.reasonId}" data-free="${r.allowFreeText}">${r.label}</option>`;
+    w.innerHTML += `<div class="pill" id="rpill-${r.reasonId}" onclick="selectReason('${r.reasonId}','${r.label}',${r.allowFreeText})">${r.label}</div>`;
   });
 }
 
-function onLocationChange() {
-  const loc = document.getElementById('location').value;
-  const destSel = document.getElementById('destination');
-  destSel.innerHTML = '<option value="">-- เลือกปลายทาง --</option>';
-  userData.locations.filter(l => l !== loc).forEach(l => {
-    destSel.innerHTML += `<option value="${l}">${l}</option>`;
-  });
+function setStepActive(s) {
+  const el = document.getElementById('step-'+s);
+  if (!el) return;
+  el.classList.remove('done'); el.classList.add('active');
+  const sn = document.getElementById('sn-'+s);
+  if (sn && sn.dataset.num) sn.textContent = sn.dataset.num;
 }
 
-function onFamilyChange() {
-  const family = document.getElementById('family').value;
-  const itemSel = document.getElementById('item');
-  itemSel.innerHTML = '<option value="">-- เลือกสินค้า --</option>';
+function setStepDone(s) {
+  const el = document.getElementById('step-'+s);
+  if (!el) return;
+  el.classList.remove('active'); el.classList.add('done');
+  const sn = document.getElementById('sn-'+s);
+  if (sn) sn.innerHTML = '<span class="ms" style="font-size:16px;color:#2e7d32">check</span>';
+}
 
-  if (!family) return;
+function setStepLocked(s) {
+  const el = document.getElementById('step-'+s);
+  if (!el) return;
+  el.classList.remove('active','done');
+}
 
-  const items = configData.items.filter(i => i.family === family);
-  items.forEach(i => {
-    itemSel.innerHTML += `<option value="${i.itemId}">${i.itemName}</option>`;
-  });
-
-  if (items.length === 1) {
-    itemSel.value = items[0].itemId;
-    onItemChange();
-  } else {
-    document.getElementById('variation-field').classList.add('hidden');
-    document.getElementById('out-target-field').classList.add('hidden');
+function advanceStep() {
+  setStepDone(activeStep);
+  const idx = stepOrder.indexOf(activeStep);
+  if (idx < stepOrder.length-1) {
+    const next = stepOrder[idx+1];
+    setStepActive(next);
+    activeStep = next;
+    setTimeout(() => document.getElementById('step-'+next)?.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+    if (next === 'confirm') buildConfirm();
   }
+  checkSaveButton();
 }
 
-function onItemChange() {
-  const itemId = document.getElementById('item').value;
+function resetAllSteps() {
+  ['location','destination','family','item','qty','confirm'].forEach(s => setStepLocked(s));
+  state = {location:null,destination:null,family:null,itemId:null,itemName:null,variation:null,outTarget:null,qty:null,unit:'',reason:null,reasonLabel:null,hasOutTargetRule:false};
+  ['ss-location','ss-destination','ss-family','ss-item','ss-qty'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=''; });
+  const qtyEl = document.getElementById('qty'); if(qtyEl) qtyEl.value = '';
+  checkSaveButton();
+}
+
+function selectLocation(loc) {
+  state.location = loc;
+  document.querySelectorAll('#location-grid .tap-card').forEach(c => c.classList.toggle('selected', c.querySelector('.tap-label')?.textContent === loc));
+  document.getElementById('ss-location').textContent = loc;
+  document.querySelectorAll('[id^="dest-"]').forEach(c => { c.style.display = c.id === 'dest-'+loc ? 'none' : ''; c.classList.remove('selected'); });
+  state.destination = null;
+  document.getElementById('ss-destination').textContent = '';
+  setStepLocked('destination'); setStepLocked('family'); setStepLocked('item'); setStepLocked('qty'); setStepLocked('confirm');
+  advanceStep();
+}
+
+function selectDestination(dest) {
+  if (dest === state.location) return;
+  state.destination = dest;
+  document.querySelectorAll('#destination-grid .tap-card').forEach(c => c.classList.toggle('selected', c.id === 'dest-'+dest));
+  document.getElementById('ss-destination').textContent = dest;
+  setStepLocked('family'); setStepLocked('item'); setStepLocked('qty'); setStepLocked('confirm');
+  advanceStep();
+}
+
+function selectFamily(fam) {
+  state.family = fam; state.itemId = null; state.itemName = null; state.variation = null; state.outTarget = null;
+  document.querySelectorAll('#family-grid .tap-card').forEach(c => c.classList.toggle('selected', c.querySelector('.tap-label')?.textContent === fam));
+  document.getElementById('ss-family').textContent = fam;
+  const sel = document.getElementById('item-select');
+  sel.innerHTML = '<option value="">-- เลือกสินค้า --</option>';
+  const items = configData.items.filter(i => i.family === fam);
+  items.forEach(i => { sel.innerHTML += `<option value="${i.itemId}">${i.itemName}</option>`; });
+  document.getElementById('variation-wrap').classList.add('hidden');
+  document.getElementById('out-target-wrap').classList.add('hidden');
+  document.getElementById('ss-item').textContent = '';
+  setStepLocked('item'); setStepLocked('qty'); setStepLocked('confirm');
+  advanceStep();
+  if (items.length === 1) { sel.value = items[0].itemId; onItemSelect(); }
+}
+
+function onItemSelect() {
+  const itemId = document.getElementById('item-select').value;
   const item = configData.items.find(i => i.itemId === itemId);
-
-  document.getElementById('variation-field').classList.add('hidden');
-  document.getElementById('out-target-field').classList.add('hidden');
-
   if (!item) return;
-
+  state.itemId = itemId; state.itemName = item.itemName; state.unit = item.unit; state.variation = null; state.outTarget = null; state.hasOutTargetRule = false;
+  document.getElementById('variation-wrap').classList.add('hidden');
+  document.getElementById('out-target-wrap').classList.add('hidden');
   if (item.variations && item.variations.length > 0) {
-    const varSel = document.getElementById('variation');
-    varSel.innerHTML = '<option value="">-- เลือกขนาด --</option>';
-    item.variations.forEach(v => {
-      varSel.innerHTML += `<option value="${v}">${v}</option>`;
-    });
-    document.getElementById('variation-field').classList.remove('hidden');
-
-    if (item.variations.length === 1) {
-      varSel.value = item.variations[0];
-      onVariationChange();
-    }
+    const pills = document.getElementById('variation-pills');
+    pills.innerHTML = '';
+    item.variations.forEach(v => { pills.innerHTML += `<div class="pill" onclick="selectVariation('${v}')">${v}</div>`; });
+    document.getElementById('variation-wrap').classList.remove('hidden');
+    if (item.variations.length === 1) selectVariation(item.variations[0]);
   } else {
-    onVariationChange();
+    checkItemDone(item);
   }
-
-  updateQtyLabel(item);
 }
 
-function onVariationChange() {
-  const itemId = document.getElementById('item').value;
-  const item = configData.items.find(i => i.itemId === itemId);
+function selectVariation(v) {
+  state.variation = v;
+  document.querySelectorAll('#variation-pills .pill').forEach(p => p.classList.toggle('selected', p.textContent === v));
+  checkItemDone(configData.items.find(i => i.itemId === state.itemId));
+}
 
-  document.getElementById('out-target-field').classList.add('hidden');
-
-  if (!item || !item.rule) return;
-
-  if (currentAction === 'OUT' && item.rule.ruleType === 'OUT_TARGET') {
-    const targetItem = configData.items.find(i => i.itemId === item.rule.value);
-    if (targetItem) {
-      const sel = document.getElementById('out-target');
-      sel.innerHTML = '<option value="">-- เลือกขนาดที่ผลิต --</option>';
-      targetItem.variations.forEach(v => {
-        sel.innerHTML += `<option value="${v}">${v}</option>`;
-      });
-      document.getElementById('out-target-field').classList.remove('hidden');
-      document.getElementById('reason-field').classList.add('hidden');
+function checkItemDone(item) {
+  if (item?.rule?.ruleType === 'OUT_TARGET' && currentAction === 'OUT') {
+    const target = configData.items.find(i => i.itemId === item.rule.value);
+    if (target) {
+      const pills = document.getElementById('out-target-pills');
+      pills.innerHTML = '';
+      target.variations.forEach(v => { pills.innerHTML += `<div class="pill" onclick="selectOutTarget('${v}')">${v}</div>`; });
+      document.getElementById('out-target-wrap').classList.remove('hidden');
+      state.hasOutTargetRule = true;
+      if (target.variations.length === 1) selectOutTarget(target.variations[0]);
+      return;
     }
   }
+  finalizeItem();
 }
 
-function onReasonChange() {
-  const sel = document.getElementById('reason');
-  const selected = sel.options[sel.selectedIndex];
-  const allowFreeText = selected && selected.dataset.free === 'true';
-  document.getElementById('reason-text-field').classList.toggle('hidden', !allowFreeText);
+function selectOutTarget(v) {
+  state.outTarget = v;
+  document.querySelectorAll('#out-target-pills .pill').forEach(p => p.classList.toggle('selected', p.textContent === v));
+  finalizeItem();
 }
 
-function updateQtyLabel(item) {
-  if (!item) {
-    item = configData ? configData.items.find(i => i.itemId === document.getElementById('item').value) : null;
+function finalizeItem() {
+  const label = [state.itemName, state.variation].filter(Boolean).join(' ');
+  document.getElementById('ss-item').textContent = label;
+  document.getElementById('qty-unit').textContent = state.unit;
+  document.getElementById('reason-wrap').classList.toggle('hidden', currentAction !== 'OUT' || state.hasOutTargetRule);
+  setStepLocked('qty'); setStepLocked('confirm');
+  advanceStep();
+}
+
+function onQtyInput() {
+  const qty = parseFloat(document.getElementById('qty').value);
+  if (!isNaN(qty) && qty > 0) {
+    state.qty = qty;
+    document.getElementById('ss-qty').textContent = qty + ' ' + state.unit;
+    if (currentAction === 'OUT' && !state.hasOutTargetRule && !state.reason) { checkSaveButton(); return; }
+    setStepLocked('confirm');
+    advanceStep();
   }
-  const unit = item ? item.unit : '';
-  document.getElementById('qty-label').textContent = `จำนวน${unit ? ' (' + unit + ')' : ''}`;
+  checkSaveButton();
+}
+
+function selectReason(id, label, allowFreeText) {
+  state.reason = id; state.reasonLabel = label;
+  document.querySelectorAll('#reason-pills .pill').forEach(p => p.classList.remove('selected'));
+  document.getElementById('rpill-'+id)?.classList.add('selected');
+  document.getElementById('reason-text-wrap').classList.toggle('hidden', !allowFreeText);
+  if (!allowFreeText) tryAdvanceFromQty();
+}
+
+function onReasonTextInput() {
+  const txt = document.getElementById('reason-text').value.trim();
+  if (txt) { state.reasonLabel = txt; tryAdvanceFromQty(); }
+}
+
+function tryAdvanceFromQty() {
+  const qty = parseFloat(document.getElementById('qty').value);
+  if (!isNaN(qty) && qty > 0 && state.reason) {
+    state.qty = qty;
+    if (activeStep === 'qty') advanceStep();
+  }
+  checkSaveButton();
+}
+
+function buildConfirm() {
+  const al = {IN:'📥 นำเข้า',OUT:'📤 นำออก',COUNT:'🔢 นับสต็อก',MOVE:'🔄 โอนย้าย'}[currentAction];
+  document.getElementById('confirm-card').innerHTML = `
+    <div class="confirm-row"><span class="confirm-key">รายการ</span><span class="confirm-action">${al}</span></div>
+    <div class="confirm-row"><span class="confirm-key">สถานที่</span><span class="confirm-val">${state.location}${state.destination?' → '+state.destination:''}</span></div>
+    <div class="confirm-row"><span class="confirm-key">สินค้า</span><span class="confirm-val">${state.itemName}${state.variation?' · '+state.variation:''}</span></div>
+    ${state.outTarget?`<div class="confirm-row"><span class="confirm-key">ผลิตเป็น</span><span class="confirm-val">${state.outTarget}</span></div>`:''}
+    <div class="confirm-row"><span class="confirm-key">จำนวน</span><span class="confirm-val" style="color:#1a73e8;font-size:16px">${state.qty} ${state.unit}</span></div>
+    ${state.reasonLabel?`<div class="confirm-row"><span class="confirm-key">เหตุผล</span><span class="confirm-val">${state.reasonLabel}</span></div>`:''}
+  `;
+}
+
+function checkSaveButton() {
+  const ready = activeStep === 'confirm' && state.location && state.itemId && state.qty > 0
+    && (currentAction !== 'MOVE' || state.destination)
+    && (currentAction !== 'OUT' || state.hasOutTargetRule || state.reason);
+  document.getElementById('save-btn').disabled = !ready;
 }
 
 async function submitForm() {
-  const action = currentAction;
-  const location = document.getElementById('location').value;
-  const family = document.getElementById('family').value;
-  const itemId = document.getElementById('item').value;
-  const variation = document.getElementById('variation').value || '';
-  const outTarget = document.getElementById('out-target').value || '';
-  const destination = document.getElementById('destination').value || '';
-  const qty = parseFloat(document.getElementById('qty').value);
-  const reasonSel = document.getElementById('reason');
-  const reasonLabel = reasonSel.options[reasonSel.selectedIndex]?.text || '';
-  const reasonText = document.getElementById('reason-text').value || '';
-  const finalReason = reasonText || reasonLabel;
-
-  const item = configData.items.find(i => i.itemId === itemId);
-
-  // Validation
-  if (!location) return alert('กรุณาเลือกสถานที่');
-  if (!family) return alert('กรุณาเลือกประเภทสินค้า');
-  if (!itemId) return alert('กรุณาเลือกสินค้า');
-  if (item?.variations?.length > 0 && !variation) return alert('กรุณาเลือกขนาด');
-  if (action === 'MOVE' && !destination) return alert('กรุณาเลือกสถานที่ปลายทาง');
-  if (action === 'MOVE' && destination === location) return alert('สถานที่ต้นทางและปลายทางต้องไม่เหมือนกัน');
-  if (isNaN(qty) || qty <= 0) return alert('กรุณาระบุจำนวนที่ถูกต้อง');
-  if (action === 'OUT' && !outTarget && !finalReason && !item?.rule) return alert('กรุณาเลือกเหตุผล');
-
-  const btn = document.getElementById('submit-btn');
+  const btn = document.getElementById('save-btn');
   btn.disabled = true;
-  btn.textContent = 'กำลังบันทึก...';
-
+  btn.innerHTML = '<span class="ms" style="font-size:20px">hourglass_top</span> กำลังบันทึก...';
   try {
-    const payload = {
-      action: 'submitStock',
-      userId: currentUserId,
-      stockAction: action,
-      location,
-      family,
-      itemId,
-      itemName: item?.itemName || '',
-      variation,
-      outTarget,
-      destination,
-      qty,
-      unit: item?.unit || '',
-      reason: finalReason,
-      hasOutTargetRule: !!(item?.rule?.ruleType === 'OUT_TARGET' && outTarget)
-    };
-
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
+    const payload = { action:'submitStock', userId:currentUserId, stockAction:currentAction, location:state.location, destination:state.destination||'', family:state.family, itemId:state.itemId, itemName:state.itemName, variation:state.variation||'', outTarget:state.outTarget||'', qty:state.qty, unit:state.unit, reason:state.reasonLabel||'', hasOutTargetRule:state.hasOutTargetRule };
+    const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) });
+    const result = await res.json();
     if (result.success) {
-      document.getElementById('form-container').classList.add('hidden');
-      document.getElementById('success').classList.remove('hidden');
-
-      let detail = `รายการ: ${action}\nสินค้า: ${family} ${item?.itemName} ${variation}\nจำนวน: ${qty} ${item?.unit}\nสถานที่: ${location}`;
-      if (destination) detail += ` → ${destination}`;
-      if (finalReason) detail += `\nเหตุผล: ${finalReason}`;
-
-      document.getElementById('success-detail').textContent = detail;
+      const al = {IN:'นำเข้า',OUT:'นำออก',COUNT:'นับสต็อก',MOVE:'โอนย้าย'}[currentAction];
+      document.getElementById('success-detail').innerHTML = `${al} · ${state.itemName}${state.variation?' '+state.variation:''}<br>${state.qty} ${state.unit} · ${state.location}${state.destination?' → '+state.destination:''}`;
+      document.getElementById('success-screen').style.display = 'flex';
     } else {
       alert('เกิดข้อผิดพลาด: ' + result.error);
       btn.disabled = false;
-      btn.textContent = '✅ บันทึก';
+      btn.innerHTML = '<span class="ms" style="font-size:20px">check_circle</span> บันทึก';
     }
-  } catch (err) {
+  } catch(err) {
     alert('เกิดข้อผิดพลาด: ' + err.message);
     btn.disabled = false;
-    btn.textContent = '✅ บันทึก';
+    btn.innerHTML = '<span class="ms" style="font-size:20px">check_circle</span> บันทึก';
   }
 }
 
 function resetForm() {
-  document.getElementById('form-container').classList.remove('hidden');
-  document.getElementById('success').classList.add('hidden');
-  document.getElementById('qty').value = '';
-  document.getElementById('submit-btn').disabled = false;
-  document.getElementById('submit-btn').textContent = '✅ บันทึก';
+  document.getElementById('success-screen').style.display = 'none';
+  resetAllSteps();
+  updateStepNumbers();
+  setStepActive('location');
+  activeStep = 'location';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 init();
